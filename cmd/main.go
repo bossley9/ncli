@@ -13,7 +13,13 @@ func main() {
 
 	pages := client.GetPages()
 
-	for i, page := range pages {
-		fmt.Printf("page at index %d is %v\n", i, page)
+	if len(pages) == 0 {
+		fmt.Println("cannot retrieve any pages")
+		return
 	}
+
+	page := pages[0]
+	text := client.PageToText(&page)
+
+	fmt.Println(text)
 }
