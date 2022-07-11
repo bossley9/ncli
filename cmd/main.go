@@ -2,30 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 
-	"git.sr.ht/~bossley9/sn/pkg/api"
+	"git.sr.ht/~bossley9/sn/pkg/notion"
 )
 
 func main() {
+	client := notion.NewClient()
+
 	fmt.Println("Hello, world!")
 
-	params := map[string]string{}
-	headers := map[string]string{}
+	pages := client.GetPages()
 
-	resp, err := api.Fetch("https://swapi.dev/api/people/1", "GET", params, headers)
-	if err != nil {
-		fmt.Println(err)
-		return
+	for i, page := range pages {
+		fmt.Printf("page at index %d is %v\n", i, page)
 	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(string(body))
 }

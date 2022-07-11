@@ -1,1 +1,5 @@
+# binary
 sn
+
+# configuration files
+pkg/notion/token.go

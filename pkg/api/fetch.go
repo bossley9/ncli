@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Fetch(url string, method string, params map[string]string, headers map[string]string) (*http.Response, error) {
+func Fetch(url string, method string, params map[string]any, headers map[string]string) (*http.Response, error) {
 	body, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
