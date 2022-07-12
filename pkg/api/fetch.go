@@ -3,21 +3,23 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
-func Fetch(url string, method string, params map[string]any, headers map[string]string) (*http.Response, error) {
-	body, err := json.Marshal(params)
+func Fetch(url string, method string, params map[string]any, headers map[string]string) ([]byte, error) {
+	bodyParams, err := json.Marshal(params)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(bodyParams))
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	req.Header.Set("Accept", "application/json")
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
@@ -26,8 +28,10 @@ func Fetch(url string, method string, params map[string]any, headers map[string]
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	return resp, err
+	defer resp.Body.Close()
+
+	return ioutil.ReadAll(resp.Body)
 }

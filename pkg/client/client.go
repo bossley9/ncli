@@ -1,16 +1,11 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"strings"
 
-	"git.sr.ht/~bossley9/sn/pkg/api"
 	"git.sr.ht/~bossley9/sn/pkg/notion"
 )
-
-const NOTION_API_VERSION = "2022-06-28"
 
 type Client struct {
 	Headers map[string]string
@@ -19,50 +14,62 @@ type Client struct {
 func NewClient() *Client {
 	client := Client{
 		Headers: map[string]string{
-			"Accept":         "application/json",
-			"Notion-Version": NOTION_API_VERSION,
+			"Notion-Version": notion.NOTION_API_VERSION,
 			"Authorization":  fmt.Sprintf("Bearer %s", NOTION_TOKEN),
 		},
 	}
 	return &client
 }
 
-func (client *Client) GetPageContent(page *NotionPage) []notion.Block {
-	params := map[string]any{}
-
-	block_id := page.ID
-	page_size := 100
-
-	url := fmt.Sprintf("https://api.notion.com/v1/blocks/%s/children?page_size=%d", block_id, page_size)
-
-	resp, err := api.Fetch(url, "GET", params, client.Headers)
+// downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.
+func (client *Client) DownloadSync() {
+	pages, err := client.fetchPages()
 	if err != nil {
 		fmt.Println(err)
-		return []notion.Block{}
+		return
 	}
 
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return []notion.Block{}
+	if len(pages) == 0 {
+		fmt.Println("cannot retrieve any pages")
+		return
 	}
 
-	var blocks_response notion.NotionBlocksResponse
-	json.Unmarshal(body, &blocks_response)
+	page := pages[0]
+	text := client.PageToText(&page)
 
-	return blocks_response.Results
+	fmt.Println(text)
 }
 
-func (client *Client) PageToText(page *NotionPage) string {
+// converts local files to page blocks and pages, then uploads and patches (or creates) server files.
+func (client *Client) UploadSync() {
+	// TODO implementation
+}
+
+func (client *Client) fetchPages() ([]notion.Page, error) {
+	searchResponse, err := client.search()
+	if err != nil {
+		return []notion.Page{}, err
+	}
+	return searchResponse.Results, nil
+}
+
+func (client *Client) fetchBlocksForPage(page *notion.Page) ([]notion.Block, error) {
+	blocks := client.retrieveBlockChildren(page.ID)
+	return blocks, nil
+}
+
+func (client *Client) PageToText(page *notion.Page) string {
 	var output strings.Builder
 
 	if page == nil {
 		return output.String()
 	}
 
-	blocks := client.GetPageContent(page)
+	blocks, err := client.fetchBlocksForPage(page)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
 
 	for _, block := range blocks {
 		output.WriteString(fmt.Sprintf("%s\n", block.ToMarkdown()))

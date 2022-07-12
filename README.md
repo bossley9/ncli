@@ -41,6 +41,9 @@ It is important to clarify that this syncing client is not:
 
 * a fully-fledged Notion CLI
 * a markdown converter
+* an extendible library
+
+This project is entirely made by me and for my personal purposes. I don't plan on making this a general-purpose program or library, but I'm always open to suggestions and patches :)
 
 ## Installation
 
