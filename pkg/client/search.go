@@ -1,4 +1,4 @@
-package notion
+package client
 
 import (
 	"encoding/json"

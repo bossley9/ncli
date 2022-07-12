@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 
-	"git.sr.ht/~bossley9/sn/pkg/notion"
+	c "git.sr.ht/~bossley9/sn/pkg/client"
 )
 
 func main() {
-	client := notion.NewClient()
-
-	fmt.Println("Hello, world!")
+	client := c.NewClient()
 
 	pages := client.GetPages()
 
