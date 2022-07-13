@@ -42,14 +42,6 @@ func (client *Client) DownloadSync() {
 	fmt.Println("done.")
 }
 
-func getRootDir() string {
-	home := os.Getenv("HOME")
-	if len(home) == 0 {
-		home = "."
-	}
-	return fmt.Sprintf("%s/Documents/notion", home)
-}
-
 func writeLocalFile(page *notion.Page, blocks *[]notion.Block) {
 	var output strings.Builder
 

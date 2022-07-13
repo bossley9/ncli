@@ -8,6 +8,7 @@ A [Notion](https://notion.so)-based notetaking CLI syncing client written in Go
 2. [Features](#features)
 3. [What this is not](#what-this-is-not)
 4. [Installation](#installation)
+5. [Usage](#usage)
 
 ## Introduction
 
@@ -54,4 +55,12 @@ This project is entirely made by me and for my personal purposes. I don't plan o
 ```sh
 make # will prompt for integration token
 $ make install
+```
+
+## Usage
+
+Run the executable to pull notes from Notion into your local files.
+
+```sh
+sn
 ```

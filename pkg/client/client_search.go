@@ -19,7 +19,7 @@ func (client *Client) search() (*notion.SearchResponse, error) {
 			"property": "object",
 			"value":    "page",
 		},
-		"page_size": 50,
+		"page_size": 10,
 	}
 
 	body, err := api.Fetch(fmt.Sprintf("%s/search", notion.NOTION_API_URL), "POST", params, client.Headers)
