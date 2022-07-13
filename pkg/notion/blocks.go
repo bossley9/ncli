@@ -6,16 +6,6 @@ import (
 	"time"
 )
 
-type NotionBlocksResponse struct {
-	Object     string `json:"object"`
-	Results    []Block
-	NextCursor interface{} `json:"next_cursor"`
-	HasMore    bool        `json:"has_more"`
-	Type       string      `json:"type"`
-	Block      struct {
-	} `json:"block"`
-}
-
 // https://developers.notion.com/reference/block
 type Block struct {
 	Object         string      `json:"object"` // always "block"
@@ -212,4 +202,13 @@ func (code *CodeBlock) ToMarkdown() string {
 	output.WriteString("```\n")
 
 	return output.String()
+}
+
+type RetrieveBlockChildrenResponse struct {
+	Object     string   `json:"object"`
+	Results    []Block  `json:"results"`
+	NextCursor *string  `json:"next_cursor"`
+	HasMore    bool     `json:"has_more"`
+	Type       string   `json:"type"`
+	Block      struct{} `json:"block"`
 }

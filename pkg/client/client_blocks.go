@@ -8,19 +8,18 @@ import (
 	"git.sr.ht/~bossley9/sn/pkg/notion"
 )
 
-func (client *Client) retrieveBlockChildren(blockID string) []notion.Block {
+func (client *Client) retrieveBlockChildren(blockID string) (*notion.RetrieveBlockChildrenResponse, error) {
 	params := map[string]any{}
 	page_size := 100
 	url := fmt.Sprintf("%s/blocks/%s/children?page_size=%d", notion.NOTION_API_URL, blockID, page_size)
 
 	body, err := api.Fetch(url, "GET", params, client.Headers)
 	if err != nil {
-		fmt.Println(err)
-		return []notion.Block{}
+		return nil, err
 	}
 
-	var blocks_response notion.NotionBlocksResponse
-	json.Unmarshal(body, &blocks_response)
+	var response notion.RetrieveBlockChildrenResponse
+	json.Unmarshal(body, &response)
 
-	return blocks_response.Results
+	return &response, nil
 }
