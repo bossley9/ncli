@@ -2,6 +2,7 @@ package notion
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -15,20 +16,18 @@ type RichText struct {
 	Type        string     `json:"type"` // one of "text", "mention", "equation"
 }
 
-func (rich *RichText) ToMarkdown() string {
+func (rich *RichText) ToMarkdown(s *strings.Builder) {
 	delimiter := ""
 
 	if rich.Annotations.Bold {
 		delimiter = "**"
 	} else if rich.Annotations.Italic {
 		delimiter = "_"
-	} else if rich.Annotations.Strikethrough {
-		delimiter = "~~"
 	} else if rich.Annotations.Code {
 		delimiter = "`"
 	}
 
-	return fmt.Sprintf("%s%s%s", delimiter, rich.PlainText, delimiter)
+	s.WriteString(fmt.Sprintf("%s%s%s", delimiter, rich.PlainText, delimiter))
 }
 
 // https://developers.notion.com/reference/rich-text#annotations

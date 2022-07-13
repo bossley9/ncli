@@ -30,29 +30,30 @@ type Block struct {
 	Code             *CodeBlock             `json:"code,omitempty"`
 }
 
-func (block *Block) ToMarkdown() string {
+func (block *Block) ToMarkdown(s *strings.Builder) {
 	switch block.Type {
 	case "paragraph":
-		return block.Paragraph.ToMarkdown()
+		block.Paragraph.ToMarkdown(s)
 	case "heading_1":
-		return block.HeadingOne.ToMarkdown()
+		block.HeadingOne.ToMarkdown(s)
 	case "heading_2":
-		return block.HeadingTwo.ToMarkdown()
+		block.HeadingTwo.ToMarkdown(s)
 	case "heading_3":
-		return block.HeadingThree.ToMarkdown()
+		block.HeadingThree.ToMarkdown(s)
 	case "quote":
-		return block.Quote.ToMarkdown()
+		block.Quote.ToMarkdown(s)
 	case "bulleted_list_item":
-		return block.BulletedListItem.ToMarkdown()
+		block.BulletedListItem.ToMarkdown(s)
 	case "numbered_list_item":
-		return block.NumberedListItem.ToMarkdown()
+		block.NumberedListItem.ToMarkdown(s)
 	case "to_do":
-		return block.Todo.ToMarkdown()
+		block.Todo.ToMarkdown(s)
 	case "code":
-		return block.Code.ToMarkdown()
+		block.Code.ToMarkdown(s)
 	default:
-		return fmt.Sprintf("UNIMPLEMENTED BLOCK TYPE: %s\n", block.Type)
+		s.WriteString(fmt.Sprintf("UNIMPLEMENTED BLOCK TYPE: %s\n", block.Type))
 	}
+	s.WriteString("\n")
 }
 
 // https://developers.notion.com/reference/block#paragraph-blocks
@@ -63,12 +64,10 @@ type ParagraphBlock struct {
 	Children []Block `json:"children"`
 }
 
-func (paragraph *ParagraphBlock) ToMarkdown() string {
-	var output strings.Builder
+func (paragraph *ParagraphBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range paragraph.RichText {
-		output.WriteString(rich.ToMarkdown())
+		rich.ToMarkdown(s)
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#heading-one-blocks
@@ -77,12 +76,10 @@ type HeadingOneBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingOneBlock) ToMarkdown() string {
-	var output strings.Builder
+func (heading *HeadingOneBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range heading.RichText {
-		output.WriteString(fmt.Sprintf("# %s", rich.PlainText))
+		s.WriteString(fmt.Sprintf("# %s", rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#heading-two-blocks
@@ -91,12 +88,10 @@ type HeadingTwoBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingTwoBlock) ToMarkdown() string {
-	var output strings.Builder
+func (heading *HeadingTwoBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range heading.RichText {
-		output.WriteString(fmt.Sprintf("## %s", rich.PlainText))
+		s.WriteString(fmt.Sprintf("## %s", rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#heading-three-blocks
@@ -105,12 +100,10 @@ type HeadingThreeBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingThreeBlock) ToMarkdown() string {
-	var output strings.Builder
+func (heading *HeadingThreeBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range heading.RichText {
-		output.WriteString(fmt.Sprintf("### %s", rich.PlainText))
+		s.WriteString(fmt.Sprintf("### %s", rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#quote-blocks
@@ -120,12 +113,10 @@ type QuoteBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (quote *QuoteBlock) ToMarkdown() string {
-	var output strings.Builder
+func (quote *QuoteBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range quote.RichText {
-		output.WriteString(fmt.Sprintf("> %s", rich.PlainText))
+		s.WriteString(fmt.Sprintf("> %s", rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#bulleted-list-item-blocks
@@ -135,12 +126,10 @@ type BulletedListItemBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (listItem *BulletedListItemBlock) ToMarkdown() string {
-	var output strings.Builder
+func (listItem *BulletedListItemBlock) ToMarkdown(s *strings.Builder) {
 	for _, rich := range listItem.RichText {
-		output.WriteString(fmt.Sprintf("* %s", rich.PlainText))
+		s.WriteString(fmt.Sprintf("* %s", rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#numbered-list-item-blocks
@@ -150,13 +139,11 @@ type NumberedListItemBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (listItem *NumberedListItemBlock) ToMarkdown() string {
-	var output strings.Builder
+func (listItem *NumberedListItemBlock) ToMarkdown(s *strings.Builder) {
 	for i, rich := range listItem.RichText {
 		// TODO fix block numbering
-		output.WriteString(fmt.Sprintf("%d. %s", i+1, rich.PlainText))
+		s.WriteString(fmt.Sprintf("%d. %s", i+1, rich.PlainText))
 	}
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#to-do-blocks
@@ -167,9 +154,7 @@ type TodoBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (todo *TodoBlock) ToMarkdown() string {
-	var output strings.Builder
-
+func (todo *TodoBlock) ToMarkdown(s *strings.Builder) {
 	var state string
 	if *todo.Checked {
 		state = "x"
@@ -178,10 +163,8 @@ func (todo *TodoBlock) ToMarkdown() string {
 	}
 
 	for _, rich := range todo.RichText {
-		output.WriteString(fmt.Sprintf("- [%s] %s", state, rich.PlainText))
+		s.WriteString(fmt.Sprintf("- [%s] %s", state, rich.PlainText))
 	}
-
-	return output.String()
 }
 
 // https://developers.notion.com/reference/block#code-blocks
@@ -191,18 +174,14 @@ type CodeBlock struct {
 	Language string     `json:"language"` // enum
 }
 
-func (code *CodeBlock) ToMarkdown() string {
-	var output strings.Builder
-
-	output.WriteString(fmt.Sprintf("```%s\n", code.Language))
+func (code *CodeBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString(fmt.Sprintf("```%s\n", code.Language))
 
 	for _, rich := range code.RichText {
-		output.WriteString(rich.PlainText)
+		s.WriteString(rich.PlainText)
 	}
 
-	output.WriteString("```\n")
-
-	return output.String()
+	s.WriteString("```\n")
 }
 
 type RetrieveBlockChildrenResponse struct {

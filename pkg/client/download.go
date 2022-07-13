@@ -83,15 +83,15 @@ func (client *Client) fetchPageBlocks(pageID string) ([]notion.Block, error) {
 }
 
 func writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
-	var output strings.Builder
+	var s strings.Builder
 
-	output.WriteString(fmt.Sprintf("# %s\n\n", title))
+	s.WriteString(fmt.Sprintf("# %s\n\n", title))
 	for _, block := range *blocks {
-		output.WriteString(fmt.Sprintf("%s\n", block.ToMarkdown()))
+		block.ToMarkdown(&s)
 	}
 
 	filename := fmt.Sprintf("%s/%s-%s.gmi", getRootDir(), title, pageID)
-	errWrite := os.WriteFile(filename, []byte(output.String()), 0600)
+	errWrite := os.WriteFile(filename, []byte(s.String()), 0600)
 	if errWrite != nil {
 		fmt.Println(errWrite)
 		return
