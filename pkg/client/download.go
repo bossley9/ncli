@@ -56,7 +56,6 @@ func (client *Client) DownloadSync() {
 }
 
 func (client *Client) fetchPageTitle(pageID string) (string, error) {
-	whitespace := regexp.MustCompilePOSIX(" ")
 	propertyItemResponse, errTitleProp := client.retrievePageProperty(pageID, "title")
 	if errTitleProp != nil {
 		return "", errTitleProp
@@ -69,9 +68,7 @@ func (client *Client) fetchPageTitle(pageID string) (string, error) {
 		return "", errors.New("invalid page title property returned from the API")
 	}
 
-	title := whitespace.ReplaceAllString(strings.ToLower(propertyItem.Title.PlainText), "-")
-
-	return title, nil
+	return propertyItem.Title.PlainText, nil
 }
 
 func (client *Client) fetchPageBlocks(pageID string) ([]notion.Block, error) {
@@ -84,14 +81,21 @@ func (client *Client) fetchPageBlocks(pageID string) ([]notion.Block, error) {
 
 func writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
 	var s strings.Builder
+	whitespace := regexp.MustCompilePOSIX(" ")
 
 	s.WriteString(fmt.Sprintf("# %s\n\n", title))
 	for _, block := range *blocks {
 		block.ToMarkdown(&s)
 	}
 
-	filename := fmt.Sprintf("%s/%s-%s.gmi", getRootDir(), title, pageID)
-	errWrite := os.WriteFile(filename, []byte(s.String()), 0600)
+	formattedTitle := whitespace.ReplaceAllString(strings.ToLower(title), "-")
+
+	// remove additional suffixed newline
+	str := s.String()
+	content := []byte(str[:len(str)-1])
+
+	filename := fmt.Sprintf("%s/%s-%s.gmi", getRootDir(), formattedTitle, pageID)
+	errWrite := os.WriteFile(filename, content, 0600)
 	if errWrite != nil {
 		fmt.Println(errWrite)
 		return
