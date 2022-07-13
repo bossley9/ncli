@@ -60,12 +60,11 @@ func (block *Block) ToMarkdown(s *strings.Builder) {
 type ParagraphBlock struct {
 	RichText []RichText `json:"rich_text"`
 	Color    Color      `json:"color"`
-	// TODO children blocks
-	Children []Block `json:"children"`
+	Children []Block    `json:"children"`
 }
 
-func (paragraph *ParagraphBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range paragraph.RichText {
+func (p *ParagraphBlock) ToMarkdown(s *strings.Builder) {
+	for _, rich := range p.RichText {
 		rich.ToMarkdown(s)
 	}
 }
@@ -76,9 +75,10 @@ type HeadingOneBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingOneBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range heading.RichText {
-		s.WriteString(fmt.Sprintf("# %s", rich.PlainText))
+func (h *HeadingOneBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString("# ")
+	for _, rich := range h.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -88,9 +88,10 @@ type HeadingTwoBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingTwoBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range heading.RichText {
-		s.WriteString(fmt.Sprintf("## %s", rich.PlainText))
+func (h *HeadingTwoBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString("## ")
+	for _, rich := range h.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -100,9 +101,10 @@ type HeadingThreeBlock struct {
 	Color    Color      `json:"color"`
 }
 
-func (heading *HeadingThreeBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range heading.RichText {
-		s.WriteString(fmt.Sprintf("### %s", rich.PlainText))
+func (h *HeadingThreeBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString("### ")
+	for _, rich := range h.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -113,9 +115,10 @@ type QuoteBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (quote *QuoteBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range quote.RichText {
-		s.WriteString(fmt.Sprintf("> %s", rich.PlainText))
+func (q *QuoteBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString("> ")
+	for _, rich := range q.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -126,9 +129,10 @@ type BulletedListItemBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (listItem *BulletedListItemBlock) ToMarkdown(s *strings.Builder) {
-	for _, rich := range listItem.RichText {
-		s.WriteString(fmt.Sprintf("* %s", rich.PlainText))
+func (li *BulletedListItemBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString("* ")
+	for _, rich := range li.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -139,10 +143,11 @@ type NumberedListItemBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (listItem *NumberedListItemBlock) ToMarkdown(s *strings.Builder) {
-	for i, rich := range listItem.RichText {
-		// TODO fix block numbering
-		s.WriteString(fmt.Sprintf("%d. %s", i+1, rich.PlainText))
+func (li *NumberedListItemBlock) ToMarkdown(s *strings.Builder) {
+	// need to fix block numbering - Notion's API doesn't play well with referencing consecutive blocks
+	s.WriteString("1. ")
+	for _, rich := range li.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -154,16 +159,17 @@ type TodoBlock struct {
 	Children []Block    `json:"children"`
 }
 
-func (todo *TodoBlock) ToMarkdown(s *strings.Builder) {
+func (t *TodoBlock) ToMarkdown(s *strings.Builder) {
 	var state string
-	if *todo.Checked {
+	if *t.Checked {
 		state = "x"
 	} else {
 		state = " "
 	}
 
-	for _, rich := range todo.RichText {
-		s.WriteString(fmt.Sprintf("- [%s] %s", state, rich.PlainText))
+	s.WriteString(fmt.Sprintf("- [%s] ", state))
+	for _, rich := range t.RichText {
+		rich.ToMarkdown(s)
 	}
 }
 
@@ -174,13 +180,11 @@ type CodeBlock struct {
 	Language string     `json:"language"` // enum
 }
 
-func (code *CodeBlock) ToMarkdown(s *strings.Builder) {
-	s.WriteString(fmt.Sprintf("```%s\n", code.Language))
-
-	for _, rich := range code.RichText {
-		s.WriteString(rich.PlainText)
+func (c *CodeBlock) ToMarkdown(s *strings.Builder) {
+	s.WriteString(fmt.Sprintf("```%s\n", c.Language))
+	for _, rich := range c.RichText {
+		rich.ToMarkdown(s)
 	}
-
 	s.WriteString("```\n")
 }
 
