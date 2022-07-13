@@ -20,7 +20,7 @@ I chose Notion because of its new developer API which makes it easy to query its
 * to convert and download text notes as markdown
 * to upload and sync new notes to the cloud
 
-The program works by using a Notion integration token to connect to specific pages you declare, convert them to markdown, then provide them as text files. These files then can be edited with any text editor (vim) and can upload changes by converting them back to Notion blocks.
+The program works by using a Notion integration token to connect to specific pages you declare, convert them to markdown (or gemtext), then provide them as text files. These files then can be edited with any text editor (vim) and can upload changes by converting them back to Notion blocks.
 
 ## Features
 

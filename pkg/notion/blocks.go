@@ -59,7 +59,8 @@ func (block *Block) ToMarkdown() string {
 type ParagraphBlock struct {
 	RichText []RichText `json:"rich_text"`
 	Color    Color      `json:"color"`
-	Children []Block    `json:"children"`
+	// TODO children blocks
+	Children []Block `json:"children"`
 }
 
 func (paragraph *ParagraphBlock) ToMarkdown() string {
