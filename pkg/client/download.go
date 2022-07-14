@@ -11,15 +11,9 @@ import (
 )
 
 // downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.
-func (c *Client) DownloadSync() {
-	fmt.Println("preparing directory...")
-	errDir := os.MkdirAll(c.ProjectDir, 0700)
-	if errDir != nil {
-		fmt.Println(errDir)
-	}
-
+func (client *Client) DownloadSync() {
 	fmt.Println("fetching pages...")
-	res, errSearch := c.search()
+	res, errSearch := client.search()
 	if errSearch != nil {
 		fmt.Println(errSearch)
 		return
@@ -36,27 +30,27 @@ func (c *Client) DownloadSync() {
 		fmt.Printf("(%d/%d) processing page %s...\n", i+1, numPages, pageID)
 
 		fmt.Println("* fetching page title...")
-		title, errTitle := c.fetchPageTitle(pageID)
+		title, errTitle := client.fetchPageTitle(pageID)
 		if errTitle != nil {
 			fmt.Println(errTitle)
 			continue
 		}
 
 		fmt.Println("* fetching page blocks...")
-		blocks, errBlocks := c.fetchPageBlocks(pageID)
+		blockRes, errBlocks := notion.RetrieveBlockChildren(pageID, "", 100)
 		if errBlocks != nil {
 			fmt.Println(errBlocks)
 			continue
 		}
 
-		c.writeLocalFile(title, pageID, &blocks)
+		client.writeLocalFile(title, pageID, &blockRes.Results)
 	}
 
 	fmt.Println("done.")
 }
 
-func (c *Client) fetchPageTitle(pageID string) (string, error) {
-	propertyItemResponse, errTitleProp := c.retrievePageProperty(pageID, "title")
+func (client *Client) fetchPageTitle(pageID string) (string, error) {
+	propertyItemResponse, errTitleProp := client.retrievePageProperty(pageID, "title")
 	if errTitleProp != nil {
 		return "", errTitleProp
 	}
@@ -71,15 +65,7 @@ func (c *Client) fetchPageTitle(pageID string) (string, error) {
 	return propertyItem.Title.PlainText, nil
 }
 
-func (c *Client) fetchPageBlocks(pageID string) ([]notion.Block, error) {
-	res, err := c.retrieveBlockChildren(pageID)
-	if err != nil {
-		return []notion.Block{}, err
-	}
-	return res.Results, nil
-}
-
-func (c *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
+func (client *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
 	var s strings.Builder
 	whitespace := regexp.MustCompilePOSIX(" ")
 
@@ -94,7 +80,7 @@ func (c *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Bl
 	str := s.String()
 	content := []byte(str[:len(str)-1])
 
-	filename := fmt.Sprintf("%s/%s-%s.gmi", c.ProjectDir, formattedTitle, pageID)
+	filename := fmt.Sprintf("%s/%s-%s.gmi", client.ProjectDir, formattedTitle, pageID)
 	errWrite := os.WriteFile(filename, content, 0600)
 	if errWrite != nil {
 		fmt.Println(errWrite)

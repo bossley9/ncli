@@ -2,4 +2,4 @@
 sn
 
 # integration token
-pkg/client/token.go
+pkg/notion/token.go

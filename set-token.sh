@@ -8,6 +8,6 @@ if [ -z $token ]; then
   return
 fi
 
-echo "package client\n\nconst NOTION_TOKEN = \"${token}\"" > "./pkg/client/token.go"
+echo "package notion\n\nconst NOTION_TOKEN = \"${token}\"" > "./pkg/notion/token.go"
 
 echo "Token set!"

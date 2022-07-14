@@ -1,9 +1,14 @@
 package notion
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
+
+	"git.sr.ht/~bossley9/sn/pkg/api"
 )
 
 // https://developers.notion.com/reference/block
@@ -195,4 +200,28 @@ type RetrieveBlockChildrenResponse struct {
 	HasMore    bool     `json:"has_more"`
 	Type       string   `json:"type"`
 	Block      struct{} `json:"block"`
+}
+
+func RetrieveBlockChildren(blockID string, startCursor string, pageSize int) (*RetrieveBlockChildrenResponse, error) {
+	qs := url.Values{}
+	if len(startCursor) > 0 {
+		qs.Set("start_cursor", startCursor)
+	}
+	if pageSize > 0 && pageSize <= 100 {
+		qs.Set("page_size", strconv.Itoa(pageSize))
+	}
+
+	url := fmt.Sprintf("%s/blocks/%s/children?%s", NOTION_API_URL, blockID, qs.Encode())
+	params := map[string]any{}
+	headers := getHeaders()
+
+	body, err := api.Fetch(url, "GET", params, headers)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RetrieveBlockChildrenResponse
+	json.Unmarshal(body, &response)
+
+	return &response, nil
 }
