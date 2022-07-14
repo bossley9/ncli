@@ -28,20 +28,25 @@ func (client *Client) DownloadSync() error {
 		fmt.Printf("(%d/%d) processing page %s...\n", i+1, numPages, pageID)
 
 		fmt.Println("\tfetching page title...")
-		title, errTitle := fetchPageTitle(pageID)
-		if errTitle != nil {
-			fmt.Println(errTitle)
-			continue
-		}
+		titleCh := make(chan Promise[string])
+		go fetchPageTitle(titleCh, pageID)
 
 		fmt.Println("\tfetching page blocks...")
-		blocks, errBlocks := fetchPageBlocks(pageID)
-		if errBlocks != nil {
-			fmt.Println(errBlocks)
+		blockCh := make(chan Promise[[]notion.Block])
+		go fetchPageBlocks(blockCh, pageID)
+
+		title := <-titleCh
+		if title.Err != nil {
+			fmt.Println(title.Err)
+			continue
+		}
+		blocks := <-blockCh
+		if blocks.Err != nil {
+			fmt.Println(blocks.Err)
 			continue
 		}
 
-		errWrite := client.writeLocalFile(title, pageID, &blocks)
+		errWrite := client.writeLocalFile(title.Res, pageID, &blocks.Res)
 		if errWrite != nil {
 			fmt.Println(errWrite)
 		}

@@ -15,29 +15,31 @@ func fetchPages() ([]notion.Page, error) {
 	return searchRes.Results, nil
 }
 
-func fetchPageTitle(pageID string) (string, error) {
+func fetchPageTitle(respCh chan<- Promise[string], pageID string) {
 	propRes, err := notion.RetrievePagePropertyItem(pageID, "title", "", 10)
 	if err != nil {
-		return "", err
+		respCh <- Promise[string]{"", nil}
 	}
 
 	if len(propRes.Results) == 0 {
-		return "", errors.New("no page title found")
+		err := errors.New("no page title found")
+		respCh <- Promise[string]{"", err}
 	}
 
 	propertyItem := propRes.Results[0]
 	if propertyItem.Type != "title" || propertyItem.Title == nil {
-		return "", errors.New("invalid page title property returned from the API")
+		err := errors.New("invalid page title property returned from the API")
+		respCh <- Promise[string]{"", err}
 	}
 
-	return propertyItem.Title.PlainText, nil
+	respCh <- Promise[string]{propertyItem.Title.PlainText, nil}
 }
 
-func fetchPageBlocks(pageID string) ([]notion.Block, error) {
-	blockRes, err := notion.RetrieveBlockChildren(pageID, "", 100)
+func fetchPageBlocks(respCh chan<- Promise[[]notion.Block], pageID string) {
+	res, err := notion.RetrieveBlockChildren(pageID, "", 100)
 	if err != nil {
-		return []notion.Block{}, err
+		respCh <- Promise[[]notion.Block]{[]notion.Block{}, err}
 	}
 
-	return blockRes.Results, nil
+	respCh <- Promise[[]notion.Block]{res.Results, err}
 }
