@@ -13,17 +13,17 @@ import (
 // downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.
 func (client *Client) DownloadSync() error {
 	fmt.Println("fetching pages...")
-	searchRes, errSearch := notion.Search("", "", 10)
+	pages, errSearch := fetchPages()
 	if errSearch != nil {
 		return errSearch
 	}
 
-	numPages := len(searchRes.Results)
+	numPages := len(pages)
 	if numPages == 0 {
 		return errors.New("no pages found")
 	}
 
-	for i, page := range searchRes.Results {
+	for i, page := range pages {
 		pageID := page.ID
 		fmt.Printf("(%d/%d) processing page %s...\n", i+1, numPages, pageID)
 
@@ -35,13 +35,13 @@ func (client *Client) DownloadSync() error {
 		}
 
 		fmt.Println("\tfetching page blocks...")
-		blockRes, errBlocks := notion.RetrieveBlockChildren(pageID, "", 100)
+		blocks, errBlocks := fetchPageBlocks(pageID)
 		if errBlocks != nil {
 			fmt.Println(errBlocks)
 			continue
 		}
 
-		errWrite := client.writeLocalFile(title, pageID, &blockRes.Results)
+		errWrite := client.writeLocalFile(title, pageID, &blocks)
 		if errWrite != nil {
 			fmt.Println(errWrite)
 		}

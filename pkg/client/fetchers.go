@@ -6,6 +6,15 @@ import (
 	"git.sr.ht/~bossley9/sn/pkg/notion"
 )
 
+func fetchPages() ([]notion.Page, error) {
+	searchRes, err := notion.Search("", "", 10)
+	if err != nil {
+		return []notion.Page{}, err
+	}
+
+	return searchRes.Results, nil
+}
+
 func fetchPageTitle(pageID string) (string, error) {
 	propRes, err := notion.RetrievePagePropertyItem(pageID, "title", "", 10)
 	if err != nil {
@@ -22,4 +31,13 @@ func fetchPageTitle(pageID string) (string, error) {
 	}
 
 	return propertyItem.Title.PlainText, nil
+}
+
+func fetchPageBlocks(pageID string) ([]notion.Block, error) {
+	blockRes, err := notion.RetrieveBlockChildren(pageID, "", 100)
+	if err != nil {
+		return []notion.Block{}, err
+	}
+
+	return blockRes.Results, nil
 }
