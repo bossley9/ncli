@@ -13,24 +13,24 @@ import (
 // downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.
 func (client *Client) DownloadSync() {
 	fmt.Println("fetching pages...")
-	res, errSearch := client.search()
+	searchRes, errSearch := notion.Search("", "", 10)
 	if errSearch != nil {
 		fmt.Println(errSearch)
 		return
 	}
 
-	numPages := len(res.Results)
+	numPages := len(searchRes.Results)
 	if numPages == 0 {
 		fmt.Println("no pages found")
 		return
 	}
 
-	for i, page := range res.Results {
+	for i, page := range searchRes.Results {
 		pageID := page.ID
 		fmt.Printf("(%d/%d) processing page %s...\n", i+1, numPages, pageID)
 
 		fmt.Println("* fetching page title...")
-		title, errTitle := client.fetchPageTitle(pageID)
+		title, errTitle := fetchPageTitle(pageID)
 		if errTitle != nil {
 			fmt.Println(errTitle)
 			continue
@@ -47,22 +47,6 @@ func (client *Client) DownloadSync() {
 	}
 
 	fmt.Println("done.")
-}
-
-func (client *Client) fetchPageTitle(pageID string) (string, error) {
-	propertyItemResponse, errTitleProp := client.retrievePageProperty(pageID, "title")
-	if errTitleProp != nil {
-		return "", errTitleProp
-	}
-	if len(propertyItemResponse.Results) == 0 {
-		return "", errors.New("no page title found")
-	}
-	propertyItem := propertyItemResponse.Results[0]
-	if propertyItem.Type != "title" || propertyItem.Title == nil {
-		return "", errors.New("invalid page title property returned from the API")
-	}
-
-	return propertyItem.Title.PlainText, nil
 }
 
 func (client *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
