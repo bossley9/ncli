@@ -24,7 +24,10 @@ func main() {
 
 	args := os.Args
 	if len(args) <= 1 {
-		client.DownloadSync()
+		err := client.DownloadSync()
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
 		usage()
 	}

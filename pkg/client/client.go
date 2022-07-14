@@ -3,26 +3,16 @@ package client
 import (
 	"fmt"
 	"os"
-
-	"git.sr.ht/~bossley9/sn/pkg/notion"
 )
 
 type Client struct {
-	Headers    map[string]string
 	ProjectDir string
 	Metadata   Metadata
 }
 
 func NewClient() *Client {
 	fmt.Println("initializing client...")
-
-	// set required authorization headers
-	client := Client{
-		Headers: map[string]string{
-			"Notion-Version": notion.NOTION_API_VERSION,
-			"Authorization":  fmt.Sprintf("Bearer %s", notion.NOTION_TOKEN),
-		},
-	}
+	client := Client{}
 
 	// set and create project directory
 	home := os.Getenv("HOME")

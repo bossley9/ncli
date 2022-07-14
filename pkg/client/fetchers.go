@@ -2,10 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"regexp"
-	"strings"
 
 	"git.sr.ht/~bossley9/sn/pkg/notion"
 )

@@ -11,45 +11,47 @@ import (
 )
 
 // downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.
-func (client *Client) DownloadSync() {
+func (client *Client) DownloadSync() error {
 	fmt.Println("fetching pages...")
 	searchRes, errSearch := notion.Search("", "", 10)
 	if errSearch != nil {
-		fmt.Println(errSearch)
-		return
+		return errSearch
 	}
 
 	numPages := len(searchRes.Results)
 	if numPages == 0 {
-		fmt.Println("no pages found")
-		return
+		return errors.New("no pages found")
 	}
 
 	for i, page := range searchRes.Results {
 		pageID := page.ID
 		fmt.Printf("(%d/%d) processing page %s...\n", i+1, numPages, pageID)
 
-		fmt.Println("* fetching page title...")
+		fmt.Println("\tfetching page title...")
 		title, errTitle := fetchPageTitle(pageID)
 		if errTitle != nil {
 			fmt.Println(errTitle)
 			continue
 		}
 
-		fmt.Println("* fetching page blocks...")
+		fmt.Println("\tfetching page blocks...")
 		blockRes, errBlocks := notion.RetrieveBlockChildren(pageID, "", 100)
 		if errBlocks != nil {
 			fmt.Println(errBlocks)
 			continue
 		}
 
-		client.writeLocalFile(title, pageID, &blockRes.Results)
+		errWrite := client.writeLocalFile(title, pageID, &blockRes.Results)
+		if errWrite != nil {
+			fmt.Println(errWrite)
+		}
 	}
 
 	fmt.Println("done.")
+	return nil
 }
 
-func (client *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Block) {
+func (client *Client) writeLocalFile(title string, pageID string, blocks *[]notion.Block) error {
 	var s strings.Builder
 	whitespace := regexp.MustCompilePOSIX(" ")
 
@@ -67,9 +69,9 @@ func (client *Client) writeLocalFile(title string, pageID string, blocks *[]noti
 	filename := fmt.Sprintf("%s/%s-%s.gmi", client.ProjectDir, formattedTitle, pageID)
 	errWrite := os.WriteFile(filename, content, 0600)
 	if errWrite != nil {
-		fmt.Println(errWrite)
-		return
+		return errWrite
 	}
 
-	fmt.Printf("* page written to %s.\n", filename)
+	fmt.Printf("\tpage written to %s.\n", filename)
+	return nil
 }
