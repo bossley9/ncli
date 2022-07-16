@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~bossley9/sn/pkg/api"
+	"git.sr.ht/~bossley9/ncli/pkg/api"
 )
 
 // https://developers.notion.com/reference/block

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"git.sr.ht/~bossley9/sn/pkg/notion"
+	"git.sr.ht/~bossley9/ncli/pkg/notion"
 )
 
 // downloads pages and corresponding page blocks, then converts to markdown and patches (or creates) local files.

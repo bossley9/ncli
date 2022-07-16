@@ -1,6 +1,6 @@
 PREFIX = /usr/local
 BIN = $(PREFIX)/bin
-EXE = sn
+EXE = ncli
 
 build: prep
 	go build -o $(EXE) ./cmd/main.go

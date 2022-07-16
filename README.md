@@ -1,4 +1,4 @@
-# sn
+# ncli
 
 A [Notion](https://notion.so)-based notetaking CLI syncing client written in Go
 
@@ -62,5 +62,5 @@ $ make install
 Run the executable to pull notes from Notion into your local files.
 
 ```sh
-sn
+ncli
 ```

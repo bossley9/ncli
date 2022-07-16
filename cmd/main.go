@@ -5,14 +5,14 @@ import (
 	"os"
 	"strings"
 
-	c "git.sr.ht/~bossley9/sn/pkg/client"
+	c "git.sr.ht/~bossley9/ncli/pkg/client"
 )
 
 func usage() {
 	var output strings.Builder
 
 	output.WriteString("usage:\n")
-	output.WriteString("\tsn (command)\n")
+	output.WriteString("\tncli (command)\n")
 	output.WriteString("commands:\n")
 	output.WriteString("\t[no args]\tdownload and sync local files\n")
 

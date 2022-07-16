@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"git.sr.ht/~bossley9/sn/pkg/api"
+	"git.sr.ht/~bossley9/ncli/pkg/api"
 )
 
 type SearchResponse struct {

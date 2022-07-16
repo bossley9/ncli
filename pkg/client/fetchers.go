@@ -3,7 +3,7 @@ package client
 import (
 	"errors"
 
-	"git.sr.ht/~bossley9/sn/pkg/notion"
+	"git.sr.ht/~bossley9/ncli/pkg/notion"
 )
 
 func fetchPages() ([]notion.Page, error) {
